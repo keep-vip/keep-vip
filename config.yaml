@@ -1,0 +1,31 @@
+cluster: cluster-01
+interface: ens33
+vip: 172.16.0.100             # 仅支持ipv4
+ChecksInterval: 2             # 单位s, 发送Gratuitous ARP、Checks间隔, 大于checks超时时间
+prometheus:
+  enabled: true               # 开启Prometheus
+  address: 0.0.0.0:9195
+# 检查端口, 如果检查失败会退出程序. 触发选举, 需要配置重启策略
+checks:
+  - name: http_80
+    protocol: tcp             # 目前仅支持tcp
+    address: 127.0.0.1:80     # 127.0.0.1:80
+    timeout: 1                # 检查端口超时时间
+members:
+  - id: server1
+    address: 172.16.0.11:20000
+  - id: server2
+    address: 172.16.0.12:20000
+  - id: server3
+    address: 172.16.0.13:20000
+loadBalancers:               # 负载均衡, 选填
+  - name: NginxLB
+    bindAddress: 0.0.0.0:8080
+    type: tcp
+    backends:
+      - name: nginx-01
+        address: 172.16.0.11:80
+      - name: nginx-02
+        address: 172.16.0.12:80
+      - name: nginx-03
+        address: 172.16.0.13:80
