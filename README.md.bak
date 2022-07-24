@@ -61,6 +61,7 @@ Keep-vip使用RAFT算法选举Leader并指定网卡绑定vip，配合负载均�
 注意:  检查失败，程序会直接退出。需要使用systemctl配置Restart=always或者docker配置--restart=always，提供重启策略
 
 ![keep-vip-haproxy](./assets/keep-vip-haproxy.png)
+![keep-vip-haproxy](https://github.com/keep-vip/keep-vip/blob/main/assets/keep-vip-haproxy.png)
 
 
 ### 2. VIP + Load Balancer
@@ -70,11 +71,13 @@ Keep-vip使用RAFT算法选举Leader并指定网卡绑定vip，配合负载均�
 Keep-vip 使用Go语言实现了负载均衡，支持tcp、udp、http协议。实现了4层和7层代理，直接代理后端服务。不需要在使用nginx或者haproxy来做负载均衡器
 
 ![keep-vip-lb](./assets/keep-vip-lb.png)
+![keep-vip-lb](https://github.com/keep-vip/keep-vip/blob/main/assets/keep-vip-lb.png)
 
 
 ## 四. Leader选举
 
 ![raft-status](./assets/raft-status.png)
+![raft-status](https://github.com/keep-vip/keep-vip/blob/main/assets/raft-status.png)
 
 
 - Leader退出会先成为Follower, 停止复制集。如果未收到新的Leader的心跳。会成为Candidate，请求投票。直到成为Leader或者收到其他Leader的心跳包成为Follower
@@ -86,7 +89,7 @@ Keep-vip 使用Go语言实现了负载均衡，支持tcp、udp、http协议。�
 # Raft算法中服务器节点之间通信使用RPC调用，基本的一致性算法只需要两种类型的RPC
 
 AppendEntries: Leader节点使用该消息向其他节点同步日志, 或者发送空消息作为心跳包以维持leader的统治地位
-请求参数: 
+请求参数:
 	- term: 当前leader节点的term值
 	- leaderId: 当前leader节点的编号（注：follower根据领导者id把客户端的请求重定向到领导者，比如有时客户端把请求发给了follower而不是leader）
 	- prevLogIndex: 当前发送的日志的前面一个日志的索引
@@ -122,6 +125,7 @@ RequestVote：Candidate节点请求其他节点投票给自己
 ### 2. 故障测试
 
 ![brain-split](./assets/brain-split-7475829.png)
+![brain-split](https://github.com/keep-vip/keep-vip/blob/main/assets/brain-split-7475829.png)
 
 
 - 使用iptables模拟网络故障
@@ -156,6 +160,7 @@ iptables -L -n -v
 - server1 leader x---x server2 || server3。server1跟server2或server3其中一个失联
 
 ![brain-split](./assets/brain-split.png)
+![brain-split](https://github.com/keep-vip/keep-vip/blob/main/assets/brain-split.png)
 
 
 ```bash
@@ -164,7 +169,7 @@ iptables -D INPUT -s 172.16.0.12/32 -p all -j ACCEPT
 iptables -A INPUT -s 172.16.0.12/32 -p all -j DROP
 # server1
 	raft: failed to contact: server-id=server2 time=500.465752ms
-	raft: failed to heartbeat to: peer=172.16.0.12:10000 error="msgpack decode error [pos 75166]: read tcp 172.16.0.11:57738->172.16.0.12:10000: i/o timeout" 
+	raft: failed to heartbeat to: peer=172.16.0.12:10000 error="msgpack decode error [pos 75166]: read tcp 172.16.0.11:57738->172.16.0.12:10000: i/o timeout"
 # server2
     raft: heartbeat timeout reached, starting election: last-leader=172.16.0.11:10000 # 心跳超时,开始选举
     raft: entering candidate state: node="Node at 172.16.0.12:10000 [Candidate]" term=6 # 成为候选人
@@ -182,6 +187,7 @@ Leader 未发生漂移, 对集群无影响继续运行
 - server1 leader x---x server2 && server3。server1同时跟server2和server3失联
 
 ![brain-split](./assets/brain-split-7475950.png)
+![brain-split](https://github.com/keep-vip/keep-vip/blob/main/assets/brain-split-7475950.png)
 
 
 ```bash
@@ -242,6 +248,7 @@ Leader切换节点，Vip发生漂移, server2和server3其中一个节点会选�
 - server1 leader x---x server2 && server3，server2 x---x server3。server1同时跟server2和server3失联，此时server2和server3也失联
 
 ![brain-split](./assets/brain-split-7476018.png)
+![brain-split](https://github.com/keep-vip/keep-vip/blob/main/assets/brain-split-7476018.png)
 
 
 ```bash
@@ -305,17 +312,17 @@ iptables -A INPUT -s 172.16.0.13/32 -p all -j DROP
     New Election event
     This node is assuming leadership of the cluster
     The Node [172.16.0.13:10000] is leading
-    raft: pipelining replication: peer="{Voter server2 172.16.0.12:10000}"  
+    raft: pipelining replication: peer="{Voter server2 172.16.0.12:10000}"
     raft: failed to contact: server-id=server1 time=2.033247789s
     raft: failed to contact: server-id=server2 time=500.406381ms
-    
+
     New Election event
     This node is becoming a follower within the cluster
     raft: failed to contact quorum of nodes, stepping down
     raft: entering follower state: follower="Node at 172.16.0.13:10000 [Follower]" leader= # 成为Follower
     raft: aborting pipeline replication: peer="{Voter server2 172.16.0.12:10000}"
     raft: lost leadership because received a requestVote with a newer term
-    
+
     raft: heartbeat timeout reached, starting election: last-leader=
     raft: entering candidate state: node="Node at 172.16.0.13:10000 [Candidate]" term=9 # 成为Candidate
     raft: votes: needed=2
@@ -329,6 +336,7 @@ Leader选举失败, 集群故障。每个节点最终都会成为候选者，陷
 - server2 x---x server3，server2和server3失联
 
 ![brain-split](./assets/brain-split-7476065.png)
+![brain-split](https://github.com/keep-vip/keep-vip/blob/main/assets/brain-split-7476065.png)
 
 ```bash
 # server2执行
@@ -342,6 +350,7 @@ server1、server2、server3 无异常日志。集群正常运行，尽快修复�
 - server2 x---x server3，server1 leader x---x server3。server2和server3失联。此时server1 leader和server3也失联
 
 ![brain-split](./assets/brain-split-7476147.png)
+![brain-split](https://github.com/keep-vip/keep-vip/blob/main/assets/brain-split-7476147.png)
 
 ```bash
 # server2执行
