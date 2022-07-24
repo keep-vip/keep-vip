@@ -39,7 +39,6 @@ loadBalancers:               # 负载均衡, 选填
         address: 172.16.0.12:80
       - name: nginx-03
         address: 172.16.0.13:80
-
 ```
 
 ## 二. Systemd
@@ -61,6 +60,8 @@ Keep-vip使用RAFT算法选举Leader并指定网卡绑定vip，配合负载均�
 
 注意:  检查失败，程序会直接退出。需要使用systemctl配置Restart=always或者docker配置--restart=always，提供重启策略
 ![keep-vip-haproxy](./assets/keep-vip-haproxy.png)
+![keep-vip-haproxy](https://github.com/keep-vip/keep-vip/blob/main/assets/keep-vip-haproxy.png)
+
 
 ### 2. VIP + Load Balancer
 
@@ -68,10 +69,14 @@ Keep-vip使用RAFT算法选举Leader并指定网卡绑定vip，配合负载均�
 
 Keep-vip 使用Go语言实现了负载均衡，支持tcp、udp、http协议。实现了4层和7层代理，直接代理后端服务。不需要在使用nginx或者haproxy来做负载均衡器
 ![keep-vip-lb](./assets/keep-vip-lb.png)
+![keep-vip-lb](https://github.com/keep-vip/keep-vip/blob/main/assets/keep-vip-lb.png)
+
 
 ## 四. Leader选举
 
 ![raft-status](./assets/raft-status.png)
+![raft-status](https://github.com/keep-vip/keep-vip/blob/main/assets/raft-status.png)
+
 
 - Leader退出会先成为Follower, 停止复制集。如果未收到新的Leader的心跳。会成为Candidate，请求投票。直到成为Leader或者收到其他Leader的心跳包成为Follower
 - Follower收到心跳包超时，会成为Candidate。发送投票请求，直到成为Leader或者收到其他Leader的心跳包，成为Follower
@@ -118,6 +123,8 @@ RequestVote：Candidate节点请求其他节点投票给自己
 ### 2. 故障测试
 
 ![brain-split](./assets/brain-split-7475829.png)
+![brain-split](https://github.com/keep-vip/keep-vip/blob/main/assets/brain-split-7475829.png)
+
 
 - 使用iptables模拟网络故障
 
@@ -151,6 +158,8 @@ iptables -L -n -v
 - server1 leader x---x server2 || server3。server1跟server2或server3其中一个失联
 
 ![brain-split](./assets/brain-split.png)
+![brain-split](https://github.com/keep-vip/keep-vip/blob/main/assets/brain-split.png)
+
 
 ```bash
 # server1执行, 断开server2的连接
@@ -176,6 +185,8 @@ Leader 未发生漂移, 对集群无影响继续运行
 - server1 leader x---x server2 && server3。server1同时跟server2和server3失联
 
 ![brain-split](./assets/brain-split-7475950.png)
+![brain-split](https://github.com/keep-vip/keep-vip/blob/main/assets/brain-split-7475950.png)
+
 
 ```bash
 # server1执行, 断开server2和server3的连接
@@ -235,6 +246,8 @@ Leader切换节点，Vip发生漂移, server2和server3其中一个节点会选�
 - server1 leader x---x server2 && server3，server2 x---x server3。server1同时跟server2和server3失联，此时server2和server3也失联
 
 ![brain-split](./assets/brain-split-7476018.png)
+![brain-split](https://github.com/keep-vip/keep-vip/blob/main/assets/brain-split-7476018.png)
+
 
 ```bash
 # server1执行, 断开server2和server3的连接
@@ -321,6 +334,7 @@ Leader选举失败, 集群故障。每个节点最终都会成为候选者，陷
 - server2 x---x server3，server2和server3失联
 
 ![brain-split](./assets/brain-split-7476065.png)
+![brain-split](https://github.com/keep-vip/keep-vip/blob/main/assets/brain-split-7476065.png)
 
 ```bash
 # server2执行
@@ -334,6 +348,7 @@ server1、server2、server3 无异常日志。集群正常运行，尽快修复�
 - server2 x---x server3，server1 leader x---x server3。server2和server3失联。此时server1 leader和server3也失联
 
 ![brain-split](./assets/brain-split-7476147.png)
+![brain-split](https://github.com/keep-vip/keep-vip/blob/main/assets/brain-split-7476147.png)
 
 ```bash
 # server2执行
