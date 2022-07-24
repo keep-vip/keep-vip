@@ -59,6 +59,7 @@ loadBalancers:               # 负载均衡, 选填
 Keep-vip使用RAFT算法选举Leader并指定网卡绑定vip，配合负载均衡器(Haproxy或者Nginx)来代理后端服务。keep-vip配置端口监测，检查负载均衡器监听的端口和负载均衡器实现共生关系。如果检查失败，则退出程序，触发RAFT选举。
 
 注意:  检查失败，程序会直接退出。需要使用systemctl配置Restart=always或者docker配置--restart=always，提供重启策略
+
 ![keep-vip-haproxy](./assets/keep-vip-haproxy.png)
 ![keep-vip-haproxy](https://github.com/keep-vip/keep-vip/blob/main/assets/keep-vip-haproxy.png)
 
@@ -68,6 +69,7 @@ Keep-vip使用RAFT算法选举Leader并指定网卡绑定vip，配合负载均�
 #### 1. 方案介绍
 
 Keep-vip 使用Go语言实现了负载均衡，支持tcp、udp、http协议。实现了4层和7层代理，直接代理后端服务。不需要在使用nginx或者haproxy来做负载均衡器
+
 ![keep-vip-lb](./assets/keep-vip-lb.png)
 ![keep-vip-lb](https://github.com/keep-vip/keep-vip/blob/main/assets/keep-vip-lb.png)
 
