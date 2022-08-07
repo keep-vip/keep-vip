@@ -42,12 +42,50 @@ loadBalancers:               # 负载均衡, 选填
 ```
 
 ## 二. Systemd
-
-```bash
-
-```
 ```shell
+cat <<- 'EOF' > /usr/lib/systemd/system/keep-vip.service
+[Unit]
+Description=Keep Vip
+After=network.target
+Wants=network.target
+[Service]
+ExecStart=/bin/keep-vip start -c /etc/keep-vip/config.yaml
+Restart=always
+RestartSec=3s
+SyslogIdentifier=keep-vip
+StandardOutput=syslog
+StandardError=syslog
+OOMScoreAdjust=-1000
+[Install]
+WantedBy=multi-user.target
+EOF
+```
+- Rsyslog 日志过滤重定向
+```shell
+# rsyslog默认会将特殊字符\t转换成#009
+echo '$EscapeControlCharactersOnReceive off' >> /etc/rsyslog.conf
+# 配置文件
+cat <<- 'EOF' >  /etc/rsyslog.d/keep-vip_log.conf
+if $programname == 'keep-vip' then /var/log/keep-vip.log
+& stop
+EOF
+# 检查语法
+rsyslogd -N1 -f /etc/rsyslog.d/keep-vip_log.conf
+# 重启rsyslog
+systemctl restart rsyslog
+systemctl status rsyslog
+```
+- Logrotate 日志切割
 
+  - copytruncate：把正在输出的日志拷(copy)一份出来，再清空(trucate)原来的日志
+```shell
+/var/log/keep-vip.log {
+    daily
+    compress
+    maxsize 30M
+    copytruncate
+    rotate 5
+}
 ```
 
 ## 三. 部署方案
