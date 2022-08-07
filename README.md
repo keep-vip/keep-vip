@@ -79,13 +79,15 @@ systemctl status rsyslog
 
   - copytruncate：把正在输出的日志拷(copy)一份出来，再清空(trucate)原来的日志
 ```shell
+cat <<- 'EOF' > /etc/logrotate.d/keep-vip_log
 /var/log/keep-vip.log {
     daily
     compress
-    maxsize 30M
+    maxsize 500M
     copytruncate
-    rotate 5
+    rotate 7
 }
+EOF
 ```
 
 ## 三. 部署方案
